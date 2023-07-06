@@ -34,7 +34,7 @@ server <- function(input, output) {
     output$cosinePlot <- renderPlot({
        t <- seq(0, 10, 0.1)
        #as.numeric(input$freq)
-       y <- sin(as.numeric(input$freq)*t)
+       y <- sin((as.numeric(input$freq))*t)
       
        qplot(t, y, geom="path", xlab="x" , ylab = "y", color = "red", fill="blue")
         
