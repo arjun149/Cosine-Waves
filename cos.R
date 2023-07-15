@@ -10,7 +10,12 @@ ui <- fluidPage(
 
     # Application title
     titlePanel("ODE Solver"),
-
+    #xc
+    #u
+    #x
+    #tx
+    #B
+    #k
     # Sidebar with a slider input for number of bins 
     sidebarLayout(
         sidebarPanel(
@@ -18,6 +23,31 @@ ui <- fluidPage(
                         "K value:",
                         min = 1,
                         max = 10,
+                        value = 1),
+            sliderInput("xc", 
+                        "Xc value:", 
+                        min = 1, 
+                        max = 10,
+                        value = 1),
+            sliderInput("u", 
+                        "U (mew) value:",
+                        min = 1,
+                        max = 10,
+                        value = 1),
+            sliderInput("x", 
+                        "X value:",
+                        min = 1,
+                        max = 10,
+                        value = 1),
+            sliderInput("tx", 
+                        "Tx (tau-x) value:",
+                        min = 1,
+                        max = 10,
+                        value = 1),
+            sliderInput("b", 
+                        "B value:",
+                        min = 1,
+                        max = 10, 
                         value = 1),
                            
              shinythemes::themeSelector(),
@@ -34,9 +64,9 @@ server <- function(input, output) {
   source(file.path("odeSolver.R"), local = TRUE)$value 
     
   output$odePlot <- renderPlot({
-    x0 <- c(x1 = 1, x2 = 0)
+    x0 <- c(x = input$x, xc = input$xc)
     # parameters
-    params <- c(k = input$k)
+    params <- c(k = input$k, u = input$u, tx = input$tx, b = input$b)
     # time points
     times <- seq(0, 30, by = 0.1)
     # solve ODE
