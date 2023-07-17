@@ -24,18 +24,8 @@ ui <- fluidPage(
                   min = 1,
                   max = 10,
                   value = 1),
-      sliderInput("xc", 
-                  "Xc value:", 
-                  min = 1, 
-                  max = 10,
-                  value = 1),
       sliderInput("u", 
                   "U (mew) value:",
-                  min = 1,
-                  max = 10,
-                  value = 1),
-      sliderInput("x", 
-                  "X value:",
                   min = 1,
                   max = 10,
                   value = 1),
@@ -64,7 +54,7 @@ server <- function(input, output) {
   source(file.path("odeSolver.R"), local = TRUE)$value 
   
   output$odePlot <- renderPlot({
-    x0 <- c(x = input$x, xc = input$xc)
+    x0 <- c(x = 1, xc = 0)
     # parameters
     params <- c(k = input$k, u = input$u, tx = input$tx, b = input$b)
     # time points
@@ -74,7 +64,7 @@ server <- function(input, output) {
     # convert result to dataframe
     out <- as.data.frame(out)
     # plot results
-    plot(out$time, out$x1, type = "l", xlab = "Time", ylab = "x1")
+    plot(out$time, out$x0, type = "l", xlab = "Time", ylab = "x1")
   })
   
   #    output$cosinePlot <- renderPlot({
