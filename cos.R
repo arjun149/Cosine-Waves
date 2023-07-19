@@ -64,7 +64,7 @@ server <- function(input, output) {
     # convert result to dataframe
     out <- as.data.frame(out)
     # plot results
-    plot(out$time, out$x, type = "l", xlab = "Time", ylab = "x1")
+    plot(out$time, out$x, type = "l", xlab = "Time", ylab = "x")
   })
   
   #    output$cosinePlot <- renderPlot({
