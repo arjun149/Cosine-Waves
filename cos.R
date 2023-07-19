@@ -19,6 +19,27 @@ ui <- fluidPage(
   # Sidebar with a slider input for number of bins 
   sidebarLayout(
     sidebarPanel(
+      verbatimTextOutput("txtout"),
+      sliderInput("n", 
+                  "n value:", 
+                  min = 1,
+                  max = 10, 
+                  value = 1),
+      sliderInput("beta", 
+                  "beta value:", 
+                  min = 1,
+                  max = 10,
+                  value = 1),
+      sliderInput("i", 
+                  "i value:",
+                  min = 1,
+                  max = 10, 
+                  value = 1),
+      sliderInput("k", 
+                  "k value:", 
+                  min = 1, 
+                  max = 10,
+                  value = 1),
       sliderInput("u", 
                   "U (mew) value:",
                   min = 1,
@@ -41,6 +62,7 @@ ui <- fluidPage(
     mainPanel(
       plotOutput("odePlot")
     )
+    
   )
 )
 
@@ -48,19 +70,35 @@ ui <- fluidPage(
 server <- function(input, output) {
   source(file.path("odeSolver.R"), local = TRUE)$value 
   
+  output$txtout <- renderText({
+    "Please input your parameter values below..."
+  })
+  
   output$odePlot <- renderPlot({
-    x0 <- c(x = 1, xc = 0, n = 0)
+    x0 <- c(x = 1, xc = 0, n = input$n)
     # parameters
-    params <- c(u = input$u, tx = input$tx, b = input$b)
+    params <- c(k = input$k, u = input$u, tx = input$tx, b = input$b, i = input$i, beta = input$beta)
     # time points
     times <- seq(0, 30, by = 0.1)
     # solve ODE
     out <- ode(y = x0, times = times, func = model, parms = params)
     # convert result to dataframe
     out <- as.data.frame(out)
+    
+    
     # plot results
     plot(out$time, out$x, type = "l", xlab = "Time", ylab = "x")
+ #   plot(out$time, out$xc, type = "l", xlab = "Time", ylab = "xc")
+ #   plot(out$time, out$n, type = "l", xlab = "Time", ylab = "n")
+ # NEW: 94-96   
+  #  for (v in x0) {
+   #  plot(out$time, out$v, type = "l", xlab = "Time", ylab = deparse(substitute(v)))
+  #  }
+    
+    
   })
+  
+
   
   #    output$cosinePlot <- renderPlot({
   #       t <- seq(0, 10, 0.1)
