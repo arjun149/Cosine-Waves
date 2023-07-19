@@ -4,6 +4,7 @@ model <- function(t, x, params) {
   # extract state variables
   y <- x[1] #x
   xc <- x[2] #xc
+  n <- x[3]
   # extract parameters
   #params["k", "u", "tx", "b"]
   
@@ -18,5 +19,7 @@ model <- function(t, x, params) {
   # combine results into a single vector
   #dxdt <- c(dx1, dx2)
   # return result as a list
-  return(list(c(dy, dxc)))
+  return(list(c(dy, dxc, as.numeric(n))))
 }
+
+
