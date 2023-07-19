@@ -19,11 +19,6 @@ ui <- fluidPage(
   # Sidebar with a slider input for number of bins 
   sidebarLayout(
     sidebarPanel(
-      sliderInput("k",
-                  "K value:",
-                  min = 1,
-                  max = 10,
-                  value = 1),
       sliderInput("u", 
                   "U (mew) value:",
                   min = 1,
@@ -56,7 +51,7 @@ server <- function(input, output) {
   output$odePlot <- renderPlot({
     x0 <- c(x = 1, xc = 0, n = 0)
     # parameters
-    params <- c(k = input$k, u = input$u, tx = input$tx, b = input$b)
+    params <- c(u = input$u, tx = input$tx, b = input$b)
     # time points
     times <- seq(0, 30, by = 0.1)
     # solve ODE
