@@ -1,6 +1,7 @@
 library(deSolve)
 
 
+
 light <- function(t, params) {
   lux <- params["maxLux"]
   lights_on <- params["lights_on"]
