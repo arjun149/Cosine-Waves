@@ -2,12 +2,18 @@ library(deSolve)
 
 
 
-alpha <- function(i, params) {
-  i <- params["i"]
-  # i0 = 9500
-  # a0 = 0.16
-  return (0.16 * (as.numeric(i) / 9500))
+
+light <- function(t, params) {
+  lux <- params["maxLux"]
+  lights_on <- params["lights_on"]
+  t_periodic <- t %% 24
+  if (as.numeric(t_periodic) < as.numeric(lights_on)) {
+    return (0.0)
+  } else {
+    return (lux)
+  }
 }
+
 
 model <- function(t, x, params) {
   # extract state variables
@@ -18,7 +24,6 @@ model <- function(t, x, params) {
   #params["k", "u", "tx", "b"]
   
   # model equations
-  i<- params["i"]
   beta <- params["beta"]
   k <- params["k"]
   u <- params["u"]
@@ -27,10 +32,11 @@ model <- function(t, x, params) {
   
   dy <- as.numeric((pi/12) * (xc + b))
   dxc <- as.numeric((pi/12) * ((u * (xc - ((4*xc**3/2)))) - (y * ((24/(0.99669 * tx))**2 + (k*b)))))
-  dn <- as.numeric(60 * (alpha(i, params) * (1 - n) - (beta * n)))
+  dn <- as.numeric(60 * (light(t, params) * (1 - n) - (beta * n)))
   # all derivatives with respect to t
   # combine results into a single vector
   #dxdt <- c(dx1, dx2)
   # return result as a list
   return(list(c(dy, dxc, dn)))
 }
+
