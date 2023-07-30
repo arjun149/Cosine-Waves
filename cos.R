@@ -1,3 +1,4 @@
+
 library(shiny)
 library(ggplot2)
 library(dplyr)
@@ -19,55 +20,58 @@ ui <- fluidPage(
   sidebarLayout(
     sidebarPanel(
       verbatimTextOutput("txtout"),
-      sliderInput("n", 
+      sliderInput("n",         #found
                   "n value:", 
-                  min = 1,
-                  max = 10, 
-                  value = 1),
-      sliderInput("beta", 
+                  min = 0,
+                  max = 1, 
+                  value = 0.5),
+      sliderInput("beta",       #found     
                   "beta value:", 
-                  min = 1,
-                  max = 10,
-                  value = 1),
+                  min = 0,
+                  max = 1,
+                  value = 0.0075),
   
       sliderInput("maxLux", 
                   "Maximum Lux value:", 
-                  min = 1,
+                  min = 0,
                   max = 10,
-                  value = 1),
+                  value = 5),
       
       sliderInput("lights_on", 
                   "Lights On value:", 
-                  min = 1,
-                  max = 10,
-                  value = 1),
+                  min = 0,
+                  max = 24,
+                  value = 10),
       
-      sliderInput("k", 
+      sliderInput("k",                  #found
                   "k value:", 
-                  min = 1, 
-                  max = 10,
-                  value = 1),
-      sliderInput("u", 
+                  min = 0, 
+                  max = 1,
+                  value = 0.55),
+      sliderInput("u",                   #found
                   "U (mew) value:",
-                  min = 1,
-                  max = 10,
-                  value = 1),
-      sliderInput("tx", 
+                  min = 0,
+                  max = 1,
+                  value = 0.23),
+      sliderInput("tx",                  #found  
                   "Tx (tau-x) value:",
-                  min = 1,
-                  max = 10,
-                  value = 1),
+                  min = 0,
+                  max = 30,
+                  value = 24.2),
       sliderInput("b", 
                   "B value:",
-                  min = 1,
-                  max = 10, 
-                  value = 1),
+                  min = 0,
+                  max = 1, 
+                  value = 0.5),
       
       shinythemes::themeSelector(),
     ),
     # Show a plot of the generated distribution
     mainPanel(
-      plotOutput("odePlot")
+      plotOutput("odePlot1"),
+      plotOutput("odePlot2"),
+      plotOutput("odePlot3"),
+      plotOutput("ligPlot")
     )
     
   )
@@ -76,32 +80,59 @@ ui <- fluidPage(
 # Define server logic required to draw a histogram
 server <- function(input, output) {
   source(file.path("odeSolver.R"), local = TRUE)$value 
+  #source(file.path("plotty.R"), local = TRUE)$value 
   
   output$txtout <- renderText({
     "Please input your parameter values below..."
   })
   
-  output$odePlot <- renderPlot({
-    x0 <- c(x = 1, xc = 0, n = input$n)
-    # parameters
-    params <- c(k = input$k, u = input$u, tx = input$tx, b = input$b, beta = input$beta, maxLux = input$maxLux, lights_on = input$lights_on)
-    # time points
-    times <- seq(0, 30, by = 0.1)
-    # solve ODE
-    out <- ode(y = x0, times = times, func = model, parms = params)
-    # convert result to dataframe
-    out <- as.data.frame(out)
+  
+ # x0 <- c(x = -0.08, xc = -1.1, n = input$n)
+#xoVars <- c("x", "xc", "n")
+  # parameters
+#  params <- c(k = input$k, u = input$u, tx = input$tx, b = input$b, beta = input$beta, maxLux = input$maxLux, lights_on = input$lights_on)
+  # time points
+#  times <- seq(0, 96, by = 0.1)
+  # solve ODE
+#  out <- ode(y = x0, times = times, func = model, parms = params)
+  # convert result to dataframe
+#  out <- as.data.frame(out)
+  
+  params <- c(k = reactive({req(input$k)}), u = reactive({req(input$u)}), tx = reactive({req(input$tx)}), b = reactive({req(input$b)}), beta = reactive({req(input$beta)}), maxLux = reactive({req(input$maxLux)}), lights_on = reactive({req(input$lights_on)}))
+  x0 <- c(x = -0.08, xc = -1.1, n = 0.5)
+  times <- seq(0, 96, by = 0.1)
+  out <- ode(y = x0, times = times, func = model, parms = params)
+  out <- as.data.frame(out)
+  
+  output$odePlot1 <- renderPlot({
+    plot(out$times, out$x, type = "l", xlab = "Time", ylab = "x")
     
     
-    # plot results
-    plot(out$time, out$n, type = "l", xlab = "Time", ylab = "n")
- #   plot(out$time, out$xc, type = "l", xlab = "Time", ylab = "xc")
- #   plot(out$time, out$n, type = "l", xlab = "Time", ylab = "n")
-  # NEW: 94-96    
-  #  for (v in x0) {
-   #  plot(out$time, out$v, type = "l", xlab = "Time", ylab = deparse(substitute(v)))
-  #  }
+  })
+  
+  output$odePlot2 <- renderPlot({
     
+    plot(out$times, out$xc, type = "l", xlab = "Time", ylab = "xc")
+    
+  })
+  
+  output$odePlot3 <- renderPlot({
+    
+    plot(out$times, out$n, type = "l", xlab = "Time", ylab = "n")
+    
+  })
+  
+  #working
+  
+  output$ligPlot <- renderPlot({
+    
+    lightsOut <- c()
+    
+    for (t in times) {
+      lightsOut <- append(lightsOut, light(t, params)) 
+    }
+    
+    plot(times, lightsOut, type = "l", xlab = "Time", ylab = "Light")
     
   })
   
