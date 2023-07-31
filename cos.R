@@ -64,7 +64,7 @@ ui <- fluidPage(
                   max = 1, 
                   value = 0.5),
       
-      shinythemes::themeSelector(),
+      shinythemes::themeSelector()
     ),
     # Show a plot of the generated distribution
     mainPanel(
@@ -98,7 +98,8 @@ server <- function(input, output) {
   # convert result to dataframe
 #  out <- as.data.frame(out)
   
-  params <- c(k = reactive({req(input$k)}), u = reactive({req(input$u)}), tx = reactive({req(input$tx)}), b = reactive({req(input$b)}), beta = reactive({req(input$beta)}), maxLux = reactive({req(input$maxLux)}), lights_on = reactive({req(input$lights_on)}))
+  params <- c(k = reactive({req(input$k)}), u = reactive({req(input$u)}), tx = reactive({req(input$tx)}), b = reactive({req(input$b)}), beta = reactive({req(input$beta)}), maxLux = reactive({req(input$maxLux)}), lights_on = reactive({req(input$lights_on)})) 
+  params <- as.numeric(unlist(params))
   x0 <- c(x = -0.08, xc = -1.1, n = 0.5)
   times <- seq(0, 96, by = 0.1)
   out <- ode(y = x0, times = times, func = model, parms = params)
@@ -129,7 +130,7 @@ server <- function(input, output) {
     lightsOut <- c()
     
     for (t in times) {
-      lightsOut <- append(lightsOut, light(t, params)) 
+    lightsOut <- append(lightsOut, light(t, params)) 
     }
     
     plot(times, lightsOut, type = "l", xlab = "Time", ylab = "Light")
