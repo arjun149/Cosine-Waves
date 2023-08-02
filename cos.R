@@ -81,76 +81,58 @@ ui <- fluidPage(
 server <- function(input, output) {
   source(file.path("odeSolver.R"), local = TRUE)$value 
   #source(file.path("plotty.R"), local = TRUE)$value 
-  
+
+  # To supplement UI input
   output$txtout <- renderText({
     "Please input your parameter values below..."
   })
+
+  # Reactivity  
+   parameters <- reactive({
+    params <- c(k = input$k,  u = input$u, 
+                tx = input$tx,  b = input$b, 
+                beta = input$beta, maxLux = input$maxLux, 
+                lights_on = input$lights_on)
+  })
   
-  
- # x0 <- c(x = -0.08, xc = -1.1, n = input$n)
-#xoVars <- c("x", "xc", "n")
-  # parameters
-#  params <- c(k = input$k, u = input$u, tx = input$tx, b = input$b, beta = input$beta, maxLux = input$maxLux, lights_on = input$lights_on)
-  # time points
-#  times <- seq(0, 96, by = 0.1)
-  # solve ODE
-#  out <- ode(y = x0, times = times, func = model, parms = params)
-  # convert result to dataframe
-#  out <- as.data.frame(out)
-  
-  params <- c(k = reactive({req(input$k)}), u = reactive({req(input$u)}), tx = reactive({req(input$tx)}), b = reactive({req(input$b)}), beta = reactive({req(input$beta)}), maxLux = reactive({req(input$maxLux)}), lights_on = reactive({req(input$lights_on)})) 
-  params <- as.numeric(unlist(params))
-  x0 <- c(x = -0.08, xc = -1.1, n = 0.5)
-  times <- seq(0, 96, by = 0.1)
-  out <- ode(y = x0, times = times, func = model, parms = params)
-  out <- as.data.frame(out)
+  simulation_result <- reactive({
+  #  params <- parameters()
+    x0 <- c(x = -0.08, xc = -1.1, n = 0.5)
+    times <- seq(0, 96, by = 0.1)
+    out <- ode(y = x0, times = times, func = model, parms = parameters())
+    out <- as.data.frame(out)
+  })
   
   output$odePlot1 <- renderPlot({
-    plot(out$times, out$x, type = "l", xlab = "Time", ylab = "x")
-    
-    
+    out <- simulation_result()
+    plot(out$time, out$x, type = "l", xlab = "Time", ylab = "x")
   })
-  
+
   output$odePlot2 <- renderPlot({
-    
-    plot(out$times, out$xc, type = "l", xlab = "Time", ylab = "xc")
-    
+    out <- simulation_result()
+    plot(out$time, out$xc, type = "l", xlab = "Time", ylab = "xc")
+
   })
-  
+
   output$odePlot3 <- renderPlot({
-    
-    plot(out$times, out$n, type = "l", xlab = "Time", ylab = "n")
-    
+    out <- simulation_result()
+    plot(out$time, out$n, type = "l", xlab = "Time", ylab = "n")
   })
-  
-  #working
   
   output$ligPlot <- renderPlot({
+    out <- simulation_result()
+   # times <- out$time
+   # params <- parameters()
     
     lightsOut <- c()
     
     for (t in times) {
-    lightsOut <- append(lightsOut, light(t, params)) 
+      lightsOut <- append(lightsOut, light(t, parameters()))
     }
-    
-    plot(times, lightsOut, type = "l", xlab = "Time", ylab = "Light")
-    
-  })
-  
+    plot(out$time, lightsOut, type = "l", xlab = "Time", ylab = "Light")
 
-  
-  #    output$cosinePlot <- renderPlot({
-  #       t <- seq(0, 10, 0.1)
-  #as.numeric(input$freq)
-  #       y <- sin((as.numeric(input$freq))*t)
-  
-  #      qplot(t, y, geom="path", xlab="x" , ylab = "y", color = "red", fill="blue")
-  
-  #   })
+  })
 }
 
 # Run the application 
 shinyApp(ui = ui, server = server)
-}
-
-
